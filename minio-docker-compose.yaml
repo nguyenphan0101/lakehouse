@@ -1,0 +1,21 @@
+services:
+  minio:
+    image: minio/minio:latest
+    container_name: minio     
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadminpassword
+      MINIO_DEFAULT_BUCKETS: default-bucket
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes: 
+      - $HOME/minio/data:/data
+    networks:
+      - data-network
+    command: server --console-address ":9001" /data
+
+networks:
+  data-network:
+    external: true
+

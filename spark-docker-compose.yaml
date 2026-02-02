@@ -1,0 +1,39 @@
+services:
+  spark-master:
+    image: apache/spark:3.5.8
+    container_name: spark_master
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=7077
+      - SPARK_MASTER_WEBUI_PORT=8088
+    ports:
+      - "8088:8088"
+      - "7077:7077"
+    command: /opt/spark/bin/spark-class org.apache.spark.deploy.master.Master
+    networks:
+      - data-network
+
+  spark-worker:
+      image: apache/spark:3.5.8
+      environment:
+        - SPARK_MASTER_URL=spark://spark-master:7077
+        - SPARK_WORKER_CORES=1
+        - SPARK_WORKER_MEMORY=512m
+      command: /opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:7077
+      depends_on:
+        - spark-master
+      networks:
+        - data-network
+      deploy:
+        replicas: 6
+        resources:
+          limits:
+            cpus: '0.5'
+            memory: 512M
+          reservations:
+            cpus: '0.25'
+            memory: 256M
+  
+networks:
+  data-network:
+    external: true
